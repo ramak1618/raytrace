@@ -12,7 +12,7 @@ public class len3 {
 
     public len3(double X, double Y, double Z) {
         this.dir = new dir3(X, Y, Z);     
-        this.len = Math.sqrt(X*X + Y*Y + Z*Z);
+        this.len = Math.hypot(Math.hypot(X, Y), Z);
     }
 
     public len3(pos3 from, pos3 to) {

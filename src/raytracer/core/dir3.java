@@ -5,19 +5,17 @@ public class dir3 {
     public final double X, Y, Z;
 
     public dir3(double x, double y, double z) {
-        double magnitude = Math.sqrt(x*x + y*y + z*z);
+        //safe way to calculate magnitude as hypot automatically takes care of underflow/overflow
+        //magnitude is ensured to be non-bad unless input itself is Infinity / NaN
+        double magnitude = Math.hypot(Math.hypot(x, y), z);
+        if(magnitude == 0) 
+            throw new IllegalArgumentException("Unexpected inputs (0, 0, 0), not a direction");
+        if(Double.isInfinite(magnitude) || Double.isNaN(magnitude))
+            throw new IllegalArgumentException("Unexpected input of Infinity / NaN");
 
-        //special value for showing "null direction"
-        if(magnitude < 1e-80) {
-            this.X = 0.0;
-            this.Y = 0.0;
-            this.Z = 0.0;
-        }
-        else {
-            this.X = x/magnitude;
-            this.Y = y/magnitude;
-            this.Z = z/magnitude;
-        }
+        this.X = x/magnitude;
+        this.Y = y/magnitude;
+        this.Z = z/magnitude;
     }
 
     public dir3(pos3 from, pos3 to) {
@@ -35,10 +33,6 @@ public class dir3 {
 
     public double cosAngleWith(dir3 d) {
         return this.X*d.X + this.Y*d.Y + this.Z*d.Z;
-    }
-
-    public boolean isnull() {
-        return this.X == this.Y && this.Y == this.Z && this.Z == 0.0;
     }
 
     public dir3 abs(dir3 about) {

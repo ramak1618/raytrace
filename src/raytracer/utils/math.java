@@ -18,17 +18,17 @@ public /* namespace */ class math {
         return track;
     }
 
-    //generates random number in range [min, max)
+    ///Generates random number in range [min, max)
     public static double random(double min, double max) {
         return min + (max - min) * (Math.random());
     }
 
+    ///Generate a random vec in unit sphere
     public static dir3 random_dir() {
-        dir3 ret = new dir3(0, 0, 0); 
-        while(ret.isnull()) 
-            ret = new dir3(random(-1, 1), random(-1, 1), random(-1, 1));
-        
-        return ret;
+        double theta = random(0, 2 * Math.PI);
+        double phi = random(0, Math.PI);
+        double sin_phi = Math.sin(phi);
+        return new dir3(sin_phi*Math.cos(theta), sin_phi*Math.sin(theta), Math.cos(phi));
     }
 
     public static color avg(color[] cols) {

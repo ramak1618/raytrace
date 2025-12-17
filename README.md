@@ -9,10 +9,7 @@ Licensed under the MIT License. [See here][licenselink]
 
 Source code
 -----------
-The project is written in Java. The code is structured to maximize immutablity across all variables, inspired by functional programming.
-Most variables are immutable even if not specified with `final`. This was done to not bloat the code with `final`, with the exception of 
-a few utility functions and loop control variables.
-
+The project is written in Java. 
 Java 25 is used for development, but Java 8+ should be fine for using this API.
 
 Directory Structure
@@ -30,7 +27,7 @@ To-do list
 - Boundify the main rendering recursion OR turn it into a loop maybe
 - Improve code explainations and custom conventions
 - Proper API documentation
-- Fix weird floating point quirks that I didn't bother to think about
+- Fix some weird floating point quirks 
 - Continue building the API with the rest of the guide
 - Multithreading??
 
