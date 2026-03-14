@@ -1,0 +1,36 @@
+#include "../../include/raycore/triangle.h"
+#include <math.h>
+
+triangle triangle_from_edges(pos3 p, vec3 e1, vec3 e2) {
+    vec3 n = cross(e1, e2);
+    double t = dot(n, n);
+    vec3 v1 = cross(n, e1);
+    vec3 v2 = cross(e2, n);
+    return (triangle) {
+        .vtx = p,
+        .p1 = [[ v1` / t ]],
+        .p2 = [[ v2` / t ]],
+        .normal = dir(n)
+    };
+}
+
+triangle triangle_from_vertices(vec3 a, vec3 b, vec3 c) {
+    return triangle_from_edges(a, [[ b`-a` ]], [[ c`-a` ]]);
+}
+
+double triangle_hit(const triangle* trngl, ray incident, double tmax) {
+    double t = dot([[ trngl->vtx` - incident.src` ]], trngl->normal) / dot(incident.dir, trngl->normal);
+    
+    if( t<0 || (t > tmax && tmax > 0) || !isfinite(t)) 
+        return -1;
+
+    vec3 intersection = ray_at(incident, t);
+    vec3 v = [[ intersection` - trngl->vtx` ]];
+    double alpha = dot(trngl->p1, v);
+    double beta = dot(trngl->p2, v);
+
+    if( alpha < 0 || beta < 0 || alpha+beta > 1)
+        return -1;
+
+    return t;
+}

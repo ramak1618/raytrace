@@ -1,0 +1,72 @@
+#include "../../include/raycore/camera.h"
+
+#include <stdlib.h>
+
+camera camera_create(pos3 pos, viewport vp, cam_orient_rfu orient, resolution res) {
+    camera cam =  {
+        .pos = pos,
+        .vp = vp,
+        .orient = orient,
+        .res = res,
+        .imgbuf = NULL,
+        .img = NULL,
+    };
+
+    cam.imgbuf = malloc(sizeof(lRGB) * res.width * res.height);
+    if(!cam.imgbuf)
+        return cam;
+    for(uint32_t i=0; i<res.width*res.height; i++)
+        cam.imgbuf[i] = (lRGB){0, 0, 0};
+
+
+    cam.img = malloc(sizeof(lRGB*) * res.height);
+    if(!cam.img) {
+        free(cam.imgbuf);
+        cam.imgbuf = NULL;
+        return cam;
+    }
+
+    for(uint32_t i=0; i<res.height; i++)
+        cam.img[i] = cam.imgbuf + i*res.width;
+    return cam;
+}
+
+void camera_destroy(camera* cam) {
+    free(cam->img);
+    free(cam->imgbuf);
+}
+
+bool render(const camera* cam, const triangle* triangles, uint32_t num_triangles) {
+    if(!cam->imgbuf)
+        return false;
+
+    vec3 dl = [[ -cam->vp.width * cam->orient.right` / cam->res.width ]];
+    vec3 du = [[ cam->vp.height * cam->orient.up` / cam->res.height ]];
+    pos3 vp_bottom_right = [[ cam->pos` - cam->vp.dist*cam->orient.forward` + 0.5*(cam->vp.width*cam->orient.right` - cam->vp.height*cam->orient.up` + dl` + du`) ]];
+
+    for(uint32_t y=0; y<cam->res.height; y++) {
+        for(uint32_t x=0; x<cam->res.width; x++) {
+            pos3 pixel = [[ vp_bottom_right` + x*dl` + y*du` ]];
+
+            ray incident = {pixel, [[cam->pos` - pixel`]] };
+            
+            double closest = -1;
+            for(uint32_t i=0; i<num_triangles; i++) {
+                double t = triangle_hit(&triangles[i], incident, closest);
+                if(t > 0) {
+                    closest = t;
+                    vec3 normal = triangles[i].normal;
+                    if(dot(normal, incident.dir) > 0)
+                        normal = [[ -normal` ]];
+                    cam->img[y][x] = (lRGB) {0.5*(1+normal.X), 0.5*(1+normal.Y), 0.5*(1+normal.Z)};
+                }
+            }
+
+            if(closest < 0) {
+                cam->img[y][x] = (lRGB) {0, 0, 0};
+            }
+        }
+    }
+
+    return true;
+}

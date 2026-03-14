@@ -1,0 +1,80 @@
+#include <vecs/vecs.h>
+#include <raycore/colors.h>
+#include <encoder/ppm.h>
+#include <raycore/camera.h>
+
+#include <stdio.h>
+
+int main() {
+    uint32_t width = 400;
+    uint32_t height = 225;
+
+    //for anti-aliasing to be impl. in future
+    uint32_t samples_per_pixel = 500;
+
+    double vp_height = 2.0;
+    double vp_width = ((double)width / (double)height) * vp_height;
+    double vp_dist = 1.0;
+
+    //Golden Ratio
+    double phi = 1.618033988749895;
+
+    // The edge length of icosahedron given the the radius of its circumsphere is 1
+    // This is equal to 2 / sqrt(2 + phi)
+    double radedge = 1.0514622242382672;
+
+    // half of edge length
+    double a = 0.5 * radedge;
+    // distance between two opposite vertices (i.e. two vertices on an axis of 5-fold symmetry)
+    double d = a * phi;
+
+    double radius = 0.5;
+    double ia = radius * a;
+    double id = radius * d;
+
+    pos3 cam_centre = {0, 1, 0};
+    dir3 forward = [[ -dir(cam_centre)` ]];
+    dir3 up = {0, 0, 1};
+    dir3 right = cross(forward, up);
+
+    camera cam = camera_create(
+            cam_centre,
+            (viewport) {vp_width, vp_height, vp_dist},
+            (cam_orient_rfu) {right, forward, up},
+            (resolution) {width, height, samples_per_pixel}
+    );
+
+    triangle world[] = {
+        triangle_from_vertices((pos3){id, ia, 0}, (pos3){ia, 0, id}, (pos3){0, id, ia}),
+        triangle_from_vertices((pos3){id, ia, 0}, (pos3){ia, 0, id}, (pos3){id, -ia, 0}),
+        triangle_from_vertices((pos3){id, ia, 0}, (pos3){ia, 0, -id}, (pos3){id, -ia, 0}),
+        triangle_from_vertices((pos3){id, ia, 0}, (pos3){ia, 0, -id}, (pos3){0, id, -ia}),
+        triangle_from_vertices((pos3){id, ia, 0}, (pos3){0, id, ia}, (pos3){0, id, -ia}),
+
+        triangle_from_vertices((pos3){-id, -ia, 0}, (pos3){-ia, 0, id}, (pos3){0, -id, ia}),
+        triangle_from_vertices((pos3){-id, -ia, 0}, (pos3){-ia, 0, id}, (pos3){-id, ia, 0}),
+        triangle_from_vertices((pos3){-id, -ia, 0}, (pos3){-ia, 0, -id}, (pos3){-id, ia, 0}),
+        triangle_from_vertices((pos3){-id, -ia, 0}, (pos3){-ia, 0, -id}, (pos3){0, -id, -ia}),
+        triangle_from_vertices((pos3){-id, -ia, 0}, (pos3){0, -id, ia}, (pos3){0, -id, -ia}),
+
+        triangle_from_vertices((pos3){-id, ia, 0}, (pos3){0, id, ia}, (pos3){-ia, 0, id}),
+        triangle_from_vertices((pos3){0, id, ia}, (pos3){-ia, 0, id}, (pos3){ia, 0, id}),
+        triangle_from_vertices((pos3){-ia, 0, id}, (pos3){ia, 0, id}, (pos3){0, -id, ia}),
+        triangle_from_vertices((pos3){ia, 0, id}, (pos3){0, -id, ia}, (pos3){id, -ia, 0}),
+        triangle_from_vertices((pos3){0, -id, ia}, (pos3){id, -ia, 0}, (pos3){0, -id, -ia}),
+                                    
+        triangle_from_vertices((pos3){id, -ia, 0}, (pos3){0, -id, -ia}, (pos3){ia, 0, -id}),
+        triangle_from_vertices((pos3){0, -id, -ia}, (pos3){ia, 0, -id}, (pos3){-ia, 0, -id}),
+        triangle_from_vertices((pos3){ia, 0, -id}, (pos3){-ia, 0, -id}, (pos3){0, id, -ia}),
+        triangle_from_vertices((pos3){-ia, 0, -id}, (pos3){0, id, -ia}, (pos3){-id, ia, 0}),
+        triangle_from_vertices((pos3){0, id, -ia}, (pos3){-id, ia, 0}, (pos3){0, id, ia})
+    };
+    uint32_t num_triangles=20;
+    if(render(&cam, world, num_triangles))
+        generatePPM(cam.img, cam.res.width, cam.res.height, "simple.ppm");
+    else
+        fprintf(stderr, "render failed!\n");
+
+    camera_destroy(&cam);
+    return 0;    
+}

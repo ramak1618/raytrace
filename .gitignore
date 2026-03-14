@@ -1,0 +1,13 @@
+# compiled executables
+*.o
+
+# img files
+*.ppm
+*.png
+
+# transpiled code
+src/raycore/
+examples/**/*.c
+
+# temp. files used for viewing .md files.
+README.html
