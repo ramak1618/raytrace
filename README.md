@@ -5,6 +5,15 @@ A personal project for building a raytracer written in C.
 You can check out the outputs for the test programs; and also write you own scenes!
 
 
+Usage
+-----
+run `build.sh`. This will install a program called `vexpand`, and runs vexpand on the source code.
+
+`vexpand` is a small transpiler that expands 3 dimensional vector (vec3) expressions.
+
+You can then go into any example and run `make` to transpile, compile, run and retrieve the output.
+
+
 License
 -------
 Licensed under the [MIT License][licenselink]
