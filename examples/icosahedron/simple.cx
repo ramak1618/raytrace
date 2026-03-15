@@ -1,6 +1,6 @@
 #include <vecs/vecs.h>
 #include <raycore/colors.h>
-#include <encoder/ppm.h>
+#include <encoder/png.h>
 #include <raycore/camera.h>
 
 #include <stdio.h>
@@ -70,8 +70,11 @@ int main() {
         triangle_from_vertices((pos3){0, id, -ia}, (pos3){-id, ia, 0}, (pos3){0, id, ia})
     };
     uint32_t num_triangles=20;
-    if(render(&cam, world, num_triangles))
-        generatePPM(cam.img, cam.res.width, cam.res.height, "simple.ppm");
+    if(render(&cam, world, num_triangles)) {
+        enum PNGerr err = generatePNG(cam.img, cam.res.width, cam.res.height, "simple.png");
+        if(err != PNG_OK)
+            fprintf(stderr, "some encoding issue!\n");
+    }
     else
         fprintf(stderr, "render failed!\n");
 
