@@ -1,5 +1,6 @@
 #include "../../include/raycore/camera.h"
 
+#include <raycore/object.h>
 #include <stdlib.h>
 
 camera camera_create(pos3 pos, viewport vp, cam_orient_rfu orient, resolution res) {
@@ -36,7 +37,7 @@ void camera_destroy(camera* cam) {
     free(cam->imgbuf);
 }
 
-bool render(const camera* cam, const triangle* triangles, uint32_t num_triangles) {
+bool render(const camera* cam, const object* objs, uint32_t num_objects) {
     if(!cam->imgbuf)
         return false;
 
@@ -51,14 +52,16 @@ bool render(const camera* cam, const triangle* triangles, uint32_t num_triangles
             ray incident = {pixel, [[cam->pos` - pixel`]] };
             
             double closest = -1;
-            for(uint32_t i=0; i<num_triangles; i++) {
-                double t = triangle_hit(&triangles[i], incident, closest);
-                if(t > 0) {
-                    closest = t;
-                    vec3 normal = triangles[i].normal;
-                    if(dot(normal, incident.dir) > 0)
-                        normal = [[ -normal` ]];
-                    cam->img[y][x] = (lRGB) {0.5*(1+normal.X), 0.5*(1+normal.Y), 0.5*(1+normal.Z)};
+            for(uint32_t i=0; i<num_objects; i++) {
+                for(uint32_t j=0; j<objs[i].num_trngls; j++) {
+                    double t = triangle_hit(&objs[i].trngls[j], incident, closest);
+                    if(t > 0) {
+                        closest = t;
+                        vec3 normal = objs[i].trngls[j].normal;
+                        if(dot(normal, incident.dir) > 0)
+                            normal = [[ -normal` ]];
+                        cam->img[y][x] = (lRGB) {0.5*(1+normal.X), 0.5*(1+normal.Y), 0.5*(1+normal.Z)};
+                    }
                 }
             }
 

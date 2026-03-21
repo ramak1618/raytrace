@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <vecs/vecs.h>
 #include "colors.h"
-#include "triangle.h"
+#include "object.h"
 
 struct viewport_t {
     double width;
@@ -40,6 +40,6 @@ typedef struct camera_t camera;
 
 camera camera_create(pos3 pos, viewport vp, cam_orient_rfu orient, resolution res);
 void camera_destroy(camera* cam);
-bool render(const camera* cam, const triangle* triangles, uint32_t num_triangles); 
+bool render(const camera* cam, const object* triangles, uint32_t num_objects); 
 
 #endif

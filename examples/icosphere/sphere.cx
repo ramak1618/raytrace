@@ -18,8 +18,8 @@ int main() {
     double vp_width = ((double)width / (double)height) * vp_height;
     double vp_dist = 1.0;
 
-    pos3 cam_centre = {0, 1, 0};
-    dir3 forward = [[ -dir(cam_centre)` ]];
+    pos3 cam_centre = {0, 1.5, -0.5};
+    dir3 forward = dir([[ (vec3){0, 0, cam_centre.Z}` - cam_centre` ]]);
     dir3 up = {0, 0, 1};
     dir3 right = cross(forward, up);
 
@@ -30,10 +30,13 @@ int main() {
             (resolution) {width, height, samples_per_pixel}
     );
 
-    triangle* sphere;
-    uint32_t num_faces = icosphere_create((pos3){0, 0, 0}, 0.5, 3, &sphere);
+    object world[] = { 
+                         icosphere_create((pos3){0, 0, 0}, 0.5, 3),
+                         icosphere_create((pos3){0, 0, -1}, 0.5, 2),
+    };
+    uint32_t num_objs = 2;
 
-    if(render(&cam, sphere, num_faces)) {
+    if(render(&cam, world, num_objs)) {
         enum PNGerr err = generatePNG(cam.img, cam.res.width, cam.res.height, "sphere.png");
         if(err != PNG_OK)
             fprintf(stderr, "some encoding issue!\n");
@@ -41,7 +44,8 @@ int main() {
     else
         fprintf(stderr, "render failed!\n");
 
-    icosphere_destroy(&sphere);
+    icosphere_destroy(&world[0]);
+    icosphere_destroy(&world[1]);
     camera_destroy(&cam);
     return 0;    
 }

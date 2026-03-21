@@ -44,7 +44,7 @@ int main() {
             (resolution) {width, height, samples_per_pixel}
     );
 
-    triangle world[] = {
+    triangle icofaces[] = {
         triangle_from_vertices((pos3){id, ia, 0}, (pos3){ia, 0, id}, (pos3){0, id, ia}),
         triangle_from_vertices((pos3){id, ia, 0}, (pos3){ia, 0, id}, (pos3){id, -ia, 0}),
         triangle_from_vertices((pos3){id, ia, 0}, (pos3){ia, 0, -id}, (pos3){id, -ia, 0}),
@@ -70,7 +70,8 @@ int main() {
         triangle_from_vertices((pos3){0, id, -ia}, (pos3){-id, ia, 0}, (pos3){0, id, ia})
     };
     uint32_t num_triangles=20;
-    if(render(&cam, world, num_triangles)) {
+    object icosahedron = { icofaces, num_triangles };
+    if(render(&cam, &icosahedron, 1)) {
         enum PNGerr err = generatePNG(cam.img, cam.res.width, cam.res.height, "simple.png");
         if(err != PNG_OK)
             fprintf(stderr, "some encoding issue!\n");

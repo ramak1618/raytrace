@@ -47,13 +47,10 @@ face std_ico[20] = {
 };
 
 
-uint32_t icosphere_create(pos3 centre, double radius, uint32_t k, triangle** trngls) {
-    if(!trngls)
-        return 0;
-
+object icosphere_create(pos3 centre, double radius, uint32_t k) {
     // don't want such high frequency icospheres.
     if(k > 8)
-        return 0;
+        return (object) {0};
 
     // no. of faces = 20 * (4^k)
     uint32_t num_faces = 20 << (2*k);
@@ -86,23 +83,24 @@ uint32_t icosphere_create(pos3 centre, double radius, uint32_t k, triangle** trn
         curr_faces *= 4;
     }
 
-
-    *trngls = malloc(sizeof(triangle) * num_faces);
-    if(!*trngls)
-        return 0;
+    object obj;
+    obj.trngls = malloc(sizeof(triangle) * num_faces);
+    obj.num_trngls = num_faces;
+    if(!obj.trngls)
+        return (object) {0};
 
     for(uint32_t i=0; i<num_faces; i++) {
         face true_vertices;
         for(uint32_t j=0; j<3; j++)
             true_vertices[j] = [[ centre` + radius*faces[i][j]` ]];
-        (*trngls)[i] = triangle_from_vertices(true_vertices[0], true_vertices[1], true_vertices[2]);
+        obj.trngls[i] = triangle_from_vertices(true_vertices[0], true_vertices[1], true_vertices[2]);
     }
 
-    return num_faces;
+    return obj;
 }
 
-void icosphere_destroy(triangle** trngls) {
-    if(trngls && *trngls)
-        free(*trngls);
-    *trngls = NULL;
+void icosphere_destroy(object* obj) {
+    if(obj && obj->trngls)
+        free(obj->trngls);
+    *obj = (object) {0};
 }
