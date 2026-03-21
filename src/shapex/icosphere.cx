@@ -1,0 +1,108 @@
+#include "../../include/shapes/icosphere.h"
+
+#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+
+// It is easier to generate icospheres with vertex triplets rather than edges
+typedef pos3 face[3];
+
+// Golden Ratio
+const double phi = 1.618033988749895;
+
+// Edge length of icosahedron given radius of circumference is 1
+// equal to 2 / sqrt(2 + phi)
+const double radedge = 1.0514622242382672;
+
+// cos(angle) subtended by edge of icosahedron at centre (= 1/sqrt(5))
+const double cosedge = 0.4472135954999579;
+
+// std. faces for k=0 icosphere, radius = 1, centre = (0, 0, 0);
+const double sa = 0.5 * radedge; //half edge length
+const double sd = sa * phi; // distance b/w opp. vertices (i.e two vertices along a 5-fold symmetric axis)
+face std_ico[20] = {
+    {{sd, sa, 0}, {sa, 0, sd}, {0, sd, sa}},
+    {{sd, sa, 0}, {sa, 0, sd}, {sd, -sa, 0}},
+    {{sd, sa, 0}, {sa, 0, -sd}, {sd, -sa, 0}},
+    {{sd, sa, 0}, {sa, 0, -sd}, {0, sd, -sa}},
+    {{sd, sa, 0}, {0, sd, sa}, {0, sd, -sa}},
+    
+    {{-sd, -sa, 0}, {-sa, 0, sd}, {0, -sd, sa}},
+    {{-sd, -sa, 0}, {-sa, 0, sd}, {-sd, sa, 0}},
+    {{-sd, -sa, 0}, {-sa, 0, -sd}, {-sd, sa, 0}},
+    {{-sd, -sa, 0}, {-sa, 0, -sd}, {0, -sd, -sa}},
+    {{-sd, -sa, 0}, {0, -sd, sa}, {0, -sd, -sa}},
+
+    {{-sd, sa, 0}, {0, sd, sa}, {-sa, 0, sd}},
+    {{0, sd, sa}, {-sa, 0, sd}, {sa, 0, sd}},
+    {{-sa, 0, sd}, {sa, 0, sd}, {0, -sd, sa}},
+    {{sa, 0, sd}, {0, -sd, sa}, {sd, -sa, 0}},
+    {{0, -sd, sa}, {sd, -sa, 0}, {0, -sd, -sa}},
+
+    {{sd, -sa, 0}, {0, -sd, -sa}, {sa, 0, -sd}},
+    {{0, -sd, -sa}, {sa, 0, -sd}, {-sa, 0, -sd}},
+    {{sa, 0, -sd}, {-sa, 0, -sd}, {0, sd, -sa}},
+    {{-sa, 0, -sd}, {0, sd, -sa}, {-sd, sa, 0}},
+    {{0, sd, -sa}, {-sd, sa, 0}, {0, sd, sa}},
+};
+
+
+uint32_t icosphere_create(pos3 centre, double radius, uint32_t k, triangle** trngls) {
+    if(!trngls)
+        return 0;
+
+    // don't want such high frequency icospheres.
+    if(k > 8)
+        return 0;
+
+    // no. of faces = 20 * (4^k)
+    uint32_t num_faces = 20 << (2*k);
+    face* faces = malloc(num_faces * sizeof(face));
+
+    uint32_t r = 1 << (2*k);
+    for(uint32_t i=0; i<20; i++) {
+        for(uint32_t j=0; j<3; j++)
+            faces[r*i][j] = std_ico[i][j];
+    }
+    
+    uint32_t curr_faces = 20;
+    for(uint32_t i=0; i<k; i++) {
+        uint32_t nr = r / 4;
+        for(uint32_t j=0; j<curr_faces; j++) {
+
+            pos3 A = dir([[ (faces[j*r][0]` + faces[j*r][1]`) ]]) ;
+            pos3 B = dir([[ (faces[j*r][1]` + faces[j*r][2]`) ]]);
+            pos3 C = dir([[ (faces[j*r][2]` + faces[j*r][0]`) ]]);
+
+            for(uint32_t k=0; k<3; k++) {
+                faces[j*r     ][k] = (face) {faces[j*r][0], C, A} [k];
+                faces[j*r+  nr][k] = (face) {faces[j*r][1], A, B} [k]; 
+                faces[j*r+2*nr][k] = (face) {faces[j*r][2], B, C} [k];
+                faces[j*r+3*nr][k] = (face) {A, B, C} [k];
+            }
+        }
+
+        r = nr;
+        curr_faces *= 4;
+    }
+
+
+    *trngls = malloc(sizeof(triangle) * num_faces);
+    if(!*trngls)
+        return 0;
+
+    for(uint32_t i=0; i<num_faces; i++) {
+        face true_vertices;
+        for(uint32_t j=0; j<3; j++)
+            true_vertices[j] = [[ centre` + radius*faces[i][j]` ]];
+        (*trngls)[i] = triangle_from_vertices(true_vertices[0], true_vertices[1], true_vertices[2]);
+    }
+
+    return num_faces;
+}
+
+void icosphere_destroy(triangle** trngls) {
+    if(trngls && *trngls)
+        free(*trngls);
+    *trngls = NULL;
+}

@@ -1,7 +1,7 @@
 .PHONY: clean build
 
-src := raycorex/triangle.cx raycorex/camera.cx
-out :=  raycore/triangle.c   raycore/camera.c
+src := raycorex/triangle.cx raycorex/camera.cx shapex/icosphere.cx
+out :=  raycore/triangle.c   raycore/camera.c  shapes/icosphere.c
 
 build: $(out)
 clean:
@@ -13,3 +13,8 @@ raycore/%.c: raycorex/%.cx | raycore/
 raycore/:
 	mkdir raycore/
 
+shapes/%.c: shapex/%.cx | shapes/
+	vexpand $< $@
+
+shapes/:
+	mkdir shapes/

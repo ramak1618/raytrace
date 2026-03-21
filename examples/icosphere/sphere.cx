@@ -1,0 +1,47 @@
+#include <vecs/vecs.h>
+#include <raycore/colors.h>
+#include <encoder/png.h>
+#include <raycore/camera.h>
+#include <shapes/icosphere.h>
+
+#include <stdio.h>
+#include <math.h>
+
+int main() {
+    uint32_t width = 400;
+    uint32_t height = 225;
+
+    //for anti-aliasing to be impl. in future
+    uint32_t samples_per_pixel = 500;
+
+    double vp_height = 2.0;
+    double vp_width = ((double)width / (double)height) * vp_height;
+    double vp_dist = 1.0;
+
+    pos3 cam_centre = {0, 1, 0};
+    dir3 forward = [[ -dir(cam_centre)` ]];
+    dir3 up = {0, 0, 1};
+    dir3 right = cross(forward, up);
+
+    camera cam = camera_create(
+            cam_centre,
+            (viewport) {vp_width, vp_height, vp_dist},
+            (cam_orient_rfu) {right, forward, up},
+            (resolution) {width, height, samples_per_pixel}
+    );
+
+    triangle* sphere;
+    uint32_t num_faces = icosphere_create((pos3){0, 0, 0}, 0.5, 3, &sphere);
+
+    if(render(&cam, sphere, num_faces)) {
+        enum PNGerr err = generatePNG(cam.img, cam.res.width, cam.res.height, "sphere.png");
+        if(err != PNG_OK)
+            fprintf(stderr, "some encoding issue!\n");
+    }
+    else
+        fprintf(stderr, "render failed!\n");
+
+    icosphere_destroy(&sphere);
+    camera_destroy(&cam);
+    return 0;    
+}

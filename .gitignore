@@ -7,6 +7,7 @@
 
 # transpiled code
 src/raycore/
+src/shapes/
 examples/**/*.c
 
 # temp. files used for viewing .md files.
