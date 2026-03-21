@@ -10,5 +10,8 @@ src/raycore/
 src/shapes/
 examples/**/*.c
 
+# vim swp files
+*.swp
+
 # temp. files used for viewing .md files.
 README.html
