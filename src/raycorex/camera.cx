@@ -37,6 +37,26 @@ void camera_destroy(camera* cam) {
     free(cam->imgbuf);
 }
 
+lRGB trace_ray(ray incident, const object* objs, uint32_t num_objects) {
+    double closest = -1;
+    lRGB clr = {0, 0, 0};
+
+    for(uint32_t i=0; i<num_objects; i++) {
+        for(uint32_t j=0; j<objs[i].num_trngls; j++) {
+            double t = triangle_hit(&objs[i].trngls[j], incident, closest);
+            if(t > 0) {
+                closest = t;
+                vec3 normal = objs[i].trngls[j].normal;
+                if(dot(normal, incident.dir) > 0)
+                    normal = [[ -normal` ]];
+                clr = (lRGB) {0.5*(1+normal.X), 0.5*(1+normal.Y), 0.5*(1+normal.Z)};
+            }
+        }
+    }
+
+    return clr;
+}
+
 bool render(const camera* cam, const object* objs, uint32_t num_objects) {
     if(!cam->imgbuf)
         return false;
@@ -50,24 +70,7 @@ bool render(const camera* cam, const object* objs, uint32_t num_objects) {
             pos3 pixel = [[ vp_bottom_right` + x*dl` + y*du` ]];
 
             ray incident = {pixel, [[cam->pos` - pixel`]] };
-            
-            double closest = -1;
-            for(uint32_t i=0; i<num_objects; i++) {
-                for(uint32_t j=0; j<objs[i].num_trngls; j++) {
-                    double t = triangle_hit(&objs[i].trngls[j], incident, closest);
-                    if(t > 0) {
-                        closest = t;
-                        vec3 normal = objs[i].trngls[j].normal;
-                        if(dot(normal, incident.dir) > 0)
-                            normal = [[ -normal` ]];
-                        cam->img[y][x] = (lRGB) {0.5*(1+normal.X), 0.5*(1+normal.Y), 0.5*(1+normal.Z)};
-                    }
-                }
-            }
-
-            if(closest < 0) {
-                cam->img[y][x] = (lRGB) {0, 0, 0};
-            }
+            cam->img[y][x] = trace_ray(incident, objs, num_objects);
         }
     }
 
