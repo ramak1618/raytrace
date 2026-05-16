@@ -24,15 +24,20 @@ License
 -------
 Licensed under the [MIT License][licenselink]
 
+Third-Party Software
+--------------------
+The random number generator at `./include/utils/pcg` directory is sourced from [pcg-c-basic][pcg_code] which is licensed under the Apache License, Version 2.0.
+A copy of the license is included in that directory.
 
 References
 ----------
--- [Raytracing In One Weekend Series][oneweekend]
+* [Raytracing In One Weekend Series][oneweekend]
 
--- [PBRT][pbrt]
+* [PBRT][pbrt]
 
--- [Icosahedron stuff][icostuff]
+* [Icosahedron stuff][icostuff]
 
+* [PCG Random Number Generator][pcg]
 
 [licenselink]: LICENSE
 [oneweekend]: https://raytracing.github.io/
@@ -40,3 +45,5 @@ References
 [icostuff]: https://geometryofthinking.com/2023/08/30/the-icosahedron/
 [deps]: #Dependencies
 [ffmpeg_home]: https://ffmpeg.org/
+[pcg_code]: https://github.com/imneme/pcg-c-basic/
+[pcg]: https://www.pcg-random.org/
