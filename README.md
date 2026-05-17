@@ -15,6 +15,7 @@ run `build.sh`. This will install a program called `vexpand`, and runs vexpand o
 
 You can then go into any example and run `make` to transpile, compile, run and retrieve the output.
 
+Note: Some scenes can take a (really) long time to render.
 
 Dependencies
 ------------

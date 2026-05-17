@@ -12,7 +12,7 @@ int main() {
     uint32_t height = 225;
 
     //for anti-aliasing to be impl. in future
-    uint32_t samples_per_pixel = 500;
+    uint32_t samples_per_pixel = 100;
 
     double vp_height = 2.0;
     double vp_width = ((double)width / (double)height) * vp_height;

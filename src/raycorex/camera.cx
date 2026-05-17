@@ -2,6 +2,7 @@
 
 #include <raycore/object.h>
 #include <stdlib.h>
+#include <utils/random.h>
 
 camera camera_create(pos3 pos, viewport vp, cam_orient_rfu orient, resolution res) {
     camera cam =  {
@@ -61,16 +62,38 @@ bool render(const camera* cam, const object* objs, uint32_t num_objects) {
     if(!cam->imgbuf)
         return false;
 
+    pcg32_gen_pair rng;
+
+    // seed with favorite numbers
+    pcg32_srandom_r(&rng.gen1, 3141, 5926);
+    pcg32_srandom_r(&rng.gen2, 16180, 339);
+
     vec3 dl = [[ -cam->vp.width * cam->orient.right` / cam->res.width ]];
     vec3 du = [[ cam->vp.height * cam->orient.up` / cam->res.height ]];
     pos3 vp_bottom_right = [[ cam->pos` - cam->vp.dist*cam->orient.forward` + 0.5*(cam->vp.width*cam->orient.right` - cam->vp.height*cam->orient.up` + dl` + du`) ]];
 
     for(uint32_t y=0; y<cam->res.height; y++) {
         for(uint32_t x=0; x<cam->res.width; x++) {
-            pos3 pixel = [[ vp_bottom_right` + x*dl` + y*du` ]];
+            lRGB pixel_color = {0, 0, 0};
 
-            ray incident = {pixel, [[cam->pos` - pixel`]] };
-            cam->img[y][x] = trace_ray(incident, objs, num_objects);
+            for(uint32_t k=0; k<cam->res.samples_per_pixel; k++) {
+                double dx = uniform_unit_double(&rng) - 0.5;
+                double dy = uniform_unit_double(&rng) - 0.5;
+                pos3 pixel = [[ vp_bottom_right` + (x+dx)*dl` + (y+dy)*du` ]];
+
+                ray incident = {pixel, [[cam->pos` - pixel`]] };
+                lRGB sample_color = trace_ray(incident, objs, num_objects);
+
+                pixel_color.red += sample_color.red;
+                pixel_color.green += sample_color.green;
+                pixel_color.blue += sample_color.blue;
+            }
+            
+            pixel_color.red /= cam->res.samples_per_pixel;
+            pixel_color.green /= cam->res.samples_per_pixel;
+            pixel_color.blue /= cam->res.samples_per_pixel;
+
+            cam->img[y][x] = pixel_color;
         }
     }
 
