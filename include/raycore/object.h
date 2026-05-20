@@ -7,7 +7,6 @@ struct object_t {
     triangle* trngls;
     uint32_t num_trngls;
 };
-
 typedef struct object_t object;
 
 #endif

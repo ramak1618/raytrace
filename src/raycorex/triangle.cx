@@ -2,35 +2,39 @@
 #include <math.h>
 
 triangle triangle_from_edges(pos3 p, vec3 e1, vec3 e2) {
-    vec3 n = cross(e1, e2);
-    double t = dot(n, n);
-    vec3 v1 = cross(n, e1);
-    vec3 v2 = cross(e2, n);
+    return triangle_from_vertices(p, [[ p`+e1` ]], [[ p`+e2` ]]);
+}
+
+triangle triangle_from_vertices(pos3 a, pos3 b, pos3 c) {
     return (triangle) {
-        .vtx = p,
-        .p1 = [[ v1` / t ]],
-        .p2 = [[ v2` / t ]],
-        .normal = dir(n)
+        .A = a,
+        .B = b,
+        .C = c
     };
 }
 
-triangle triangle_from_vertices(vec3 a, vec3 b, vec3 c) {
-    return triangle_from_edges(a, [[ b`-a` ]], [[ c`-a` ]]);
-}
+hit_record triangle_hit(const triangle* trngl, ray incident, double tmax) {
+    vec3 e1 = [[ trngl->B` - trngl->A` ]];
+    vec3 e2 = [[ trngl->C` - trngl->A` ]];
+    vec3 n = cross(e1, e2);
+    double m = dot(n, incident.dir);
+    vec3 v = [[ incident.src` - trngl->A` ]];
+    vec3 L = cross(v, incident.dir);
 
-double triangle_hit(const triangle* trngl, ray incident, double tmax) {
-    double t = dot([[ trngl->vtx` - incident.src` ]], trngl->normal) / dot(incident.dir, trngl->normal);
-    
-    if( t<0 || (t > tmax && tmax > 0) || !isfinite(t)) 
-        return -1;
+    double alpha = -dot(L, e2) / m;
+    double beta = dot(L, e1) / m;
+    double t = -dot(v, n) / m;
 
-    vec3 intersection = ray_at(incident, t);
-    vec3 v = [[ intersection` - trngl->vtx` ]];
-    double alpha = dot(trngl->p1, v);
-    double beta = dot(trngl->p2, v);
+    if(t < 0 || (t > tmax && tmax > 0) || alpha < 0 || beta < 0 || alpha+beta > 1) {
+        return (hit_record) {
+            .t = -1.0
+        };
+    }
 
-    if( alpha < 0 || beta < 0 || alpha+beta > 1)
-        return -1;
-
-    return t;
+    return (hit_record) {
+        .normal = dir(n),
+        .t = t,
+        .alpha = alpha,
+        .beta = beta
+    };
 }

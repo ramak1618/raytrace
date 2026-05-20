@@ -32,7 +32,7 @@ int main() {
     double ia = radius * a;
     double id = radius * d;
 
-    pos3 cam_centre = {0, 1, 0};
+    pos3 cam_centre = {1, 0, 0};
     dir3 forward = [[ -dir(cam_centre)` ]];
     dir3 up = {0, 0, 1};
     dir3 right = cross(forward, up);

@@ -44,10 +44,10 @@ lRGB trace_ray(ray incident, const object* objs, uint32_t num_objects) {
 
     for(uint32_t i=0; i<num_objects; i++) {
         for(uint32_t j=0; j<objs[i].num_trngls; j++) {
-            double t = triangle_hit(&objs[i].trngls[j], incident, closest);
-            if(t > 0) {
-                closest = t;
-                vec3 normal = objs[i].trngls[j].normal;
+            hit_record hitrec = triangle_hit(&objs[i].trngls[j], incident, closest);
+            if(hitrec.t > 0) {
+                closest = hitrec.t;
+                vec3 normal = hitrec.normal;
                 if(dot(normal, incident.dir) > 0)
                     normal = [[ -normal` ]];
                 clr = (lRGB) {0.5*(1+normal.X), 0.5*(1+normal.Y), 0.5*(1+normal.Z)};
