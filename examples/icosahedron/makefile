@@ -5,3 +5,7 @@ build:
 	vexpand simple.cx simple.c
 	gcc -O3 -flto -Wall -Wextra -Wpedantic -Werror -I"../../include/"  $(coresrc) simple.c -lm -lavcodec -lavutil -o simple.o 
 	./simple.o
+
+debug:
+	vexpand simple.cx simple.c
+	gcc -g -fsanitize=address -O3 -flto -Wall -Wextra -Wpedantic -Werror -I"../../include/"  $(coresrc) simple.c -lm -lavcodec -lavutil -o simple.o

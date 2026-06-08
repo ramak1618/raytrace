@@ -5,7 +5,6 @@
 
 struct encoder {
     AVCodecContext* ctx;
-    AVFrame* frame;
     AVPacket** pkts;
     size_t num_pkts;
 };
@@ -13,7 +12,6 @@ struct encoder {
 // Reference: https://ffmpeg.org/doxygen/trunk/encode_video_8c-example.html
 enum PNGerr encoder_create(struct encoder* enc, lRGB** img, uint32_t width, uint32_t height) {
     enc->ctx = NULL;
-    enc->frame = NULL;
     enc->pkts = NULL;
 
     const AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_PNG);
@@ -66,8 +64,11 @@ enum PNGerr encoder_create(struct encoder* enc, lRGB** img, uint32_t width, uint
     int result;
     do {
         enc->pkts[enc->num_pkts] = av_packet_alloc();
-        if(!enc->pkts[enc->num_pkts])
+        if(!enc->pkts[enc->num_pkts]) {
+            // delete packet that was just recieved
+            av_packet_free(&enc->pkts[enc->num_pkts]);
             return PNG_ALLOC_ERR;
+        }
 
         result = avcodec_receive_packet(enc->ctx, enc->pkts[enc->num_pkts]);
         enc->num_pkts++;
@@ -85,6 +86,8 @@ enum PNGerr encoder_create(struct encoder* enc, lRGB** img, uint32_t width, uint
         }
     } while(result >= 0);
 
+    av_frame_free(&frame); 
+
     return PNG_OK;
 }
 
@@ -94,9 +97,6 @@ void encoder_destroy(struct encoder* enc) {
             av_packet_free(&enc->pkts[i]);
         free(enc->pkts);
     }
-
-    if(enc->frame)
-        av_frame_free(&enc->frame);
 
     if(enc->ctx)
         avcodec_free_context(&enc->ctx);

@@ -5,3 +5,7 @@ build:
 	vexpand sphere.cx sphere.c
 	gcc -O3 -flto -Wall -Wextra -Wpedantic -Werror -I"../../include/"  $(coresrc) sphere.c -lm -lavcodec -lavutil -o sphere.o 
 	./sphere.o
+
+debug:
+	vexpand sphere.cx sphere.c
+	gcc -O3 -flto -g -fsanitize=address -Wall -Wextra -Wpedantic -Werror -I"../../include/" $(coresrc) sphere.c -lm -lavcodec -lavutil -o sphere.o

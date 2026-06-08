@@ -96,6 +96,8 @@ object icosphere_create(pos3 centre, double radius, uint32_t k) {
         obj.trngls[i] = triangle_from_vertices(true_vertices[0], true_vertices[1], true_vertices[2]);
     }
 
+    free(faces);
+
     return obj;
 }
 
