@@ -1,7 +1,6 @@
 .PHONY: clean build
 
-src := raycorex/triangle.cx raycorex/camera.cx shapex/icosphere.cx
-out :=  raycore/triangle.c   raycore/camera.c  shapes/icosphere.c
+out :=  raycore/triangle.c  raycore/bbox.c raycore/camera.c shapes/icosphere.c 
 
 build: $(out)
 clean:

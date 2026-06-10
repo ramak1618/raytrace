@@ -9,8 +9,7 @@ int main() {
     uint32_t width = 400;
     uint32_t height = 225;
 
-    //for anti-aliasing to be impl. in future
-    uint32_t samples_per_pixel = 500;
+    uint32_t samples_per_pixel = 100;
 
     double vp_height = 2.0;
     double vp_width = ((double)width / (double)height) * vp_height;
@@ -70,7 +69,29 @@ int main() {
         triangle_from_vertices((pos3){0, id, -ia}, (pos3){-id, ia, 0}, (pos3){0, id, ia})
     };
     uint32_t num_triangles=20;
-    object icosahedron = { icofaces, num_triangles };
+    object icosahedron = { icofaces, num_triangles, NULL };
+
+    // prepare a simple BVH
+    BVH bvol = { 
+        // we are'nt actually creating and BVH, so just keep a big box.
+        .bbox = (AABB) {
+            .x_min = -1e6,
+            .x_max = 1e6,
+            .y_min = -1e6,
+            .y_max = 1e6,
+            .z_min = -1e6,
+            .z_max = 1e6
+        },
+        .trngl_indices = Array_create(sizeof(uint32_t), 20),
+        .left = NULL,
+        .right = NULL,
+    };
+
+    icosahedron.bound_vol = &bvol;
+    for(uint32_t i=0; i<20; i++)
+        ((uint32_t*)bvol.trngl_indices.data) [i] = i;
+    bvol.trngl_indices.size = 20;
+
     if(render(&cam, &icosahedron, 1)) {
         enum PNGerr err = generatePNG(cam.img, cam.res.width, cam.res.height, "simple.png");
         if(err != PNG_OK)
@@ -79,6 +100,7 @@ int main() {
     else
         fprintf(stderr, "render failed!\n");
 
+    Array_destroy(&bvol.trngl_indices);
     camera_destroy(&cam);
     return 0;    
 }

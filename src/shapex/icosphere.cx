@@ -47,6 +47,9 @@ face std_ico[20] = {
 };
 
 
+void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis);
+void BVH_destroy(BVH* node);
+
 object icosphere_create(pos3 centre, double radius, uint32_t k) {
     // don't want such high frequency icospheres.
     if(k > 8)
@@ -55,6 +58,8 @@ object icosphere_create(pos3 centre, double radius, uint32_t k) {
     // no. of faces = 20 * (4^k)
     uint32_t num_faces = 20 << (2*k);
     face* faces = malloc(num_faces * sizeof(face));
+    if(!faces)
+        return (object) {0};
 
     uint32_t r = 1 << (2*k);
     for(uint32_t i=0; i<20; i++) {
@@ -86,8 +91,10 @@ object icosphere_create(pos3 centre, double radius, uint32_t k) {
     object obj;
     obj.trngls = malloc(sizeof(triangle) * num_faces);
     obj.num_trngls = num_faces;
-    if(!obj.trngls)
-        return (object) {0};
+    if(!obj.trngls) {
+        obj = (object) {0}; 
+        goto end;
+    }
 
     for(uint32_t i=0; i<num_faces; i++) {
         face true_vertices;
@@ -96,13 +103,108 @@ object icosphere_create(pos3 centre, double radius, uint32_t k) {
         obj.trngls[i] = triangle_from_vertices(true_vertices[0], true_vertices[1], true_vertices[2]);
     }
 
-    free(faces);
+    obj.bound_vol = malloc(sizeof(BVH));
+    obj.bound_vol->bbox = (AABB) {
+        .x_min = centre.X - radius,
+        .x_max = centre.X + radius,
+        .y_min = centre.Y - radius,
+        .y_max = centre.Y + radius,
+        .z_min = centre.Z - radius,
+        .z_max = centre.Z + radius
+    };
+    obj.bound_vol->left = NULL;
+    obj.bound_vol->right = NULL;
 
+    obj.bound_vol->trngl_indices = Array_create(sizeof(uint32_t), obj.num_trngls);
+    for(uint32_t i=0; i<obj.num_trngls; i++) 
+        ((uint32_t*)(obj.bound_vol->trngl_indices.data)) [i] = i;
+    obj.bound_vol->trngl_indices.size = obj.num_trngls;
+
+    BVH_construct(obj.trngls, obj.bound_vol, AXIS_X);
+end:
+    free(faces);
     return obj;
 }
 
+void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis) {
+    if(node->trngl_indices.size <= 20) {
+        node->left = NULL;
+        node->right = NULL;
+        return;
+    }
+
+    node->left = malloc(sizeof(BVH));
+    node->right = malloc(sizeof(BVH));
+
+    if(!node->left || !node->right) 
+        return; // TODO: Handle this properly
+
+    XYZ_axis next_axis;
+    double mid;
+
+    node->left->bbox = node->bbox;
+    node->right->bbox = node->bbox;
+
+    switch(split_axis) {
+        case AXIS_X:
+            mid = 0.5 * (node->bbox.x_min + node->bbox.x_max);
+            next_axis = AXIS_Y;
+            node->left->bbox.x_max = mid;
+            node->right->bbox.x_min = mid;
+            break;
+        case AXIS_Y:
+            mid = 0.5 * (node->bbox.y_min + node->bbox.y_max);
+            next_axis = AXIS_Z;
+            node->left->bbox.y_max = mid;
+            node->right->bbox.y_min = mid;
+            break;
+        case AXIS_Z:
+            mid = 0.5 * (node->bbox.z_min + node->bbox.z_max);
+            next_axis = AXIS_X;
+            node->left->bbox.z_max = mid;
+            node->right->bbox.z_min = mid;
+            break;
+    }
+
+    node->left->trngl_indices = Array_create(sizeof(uint32_t), 10);
+    node->right->trngl_indices = Array_create(sizeof(uint32_t), 10);
+
+    for(uint32_t i=0; i<node->trngl_indices.size; i++) {
+        if(is_triangle_in_left( &trngls[ ((uint32_t*)(node->trngl_indices.data)) [i] ], mid, split_axis) ) {
+            bool tmp = Array_grow_if_full(&node->left->trngl_indices);
+            if(!tmp)
+                return; // TODO: Handle this properly
+            ((uint32_t*)(node->left->trngl_indices.data)) [node->left->trngl_indices.size] = ((uint32_t*)node->trngl_indices.data)[i];
+            node->left->trngl_indices.size++;
+        }
+        if(is_triangle_in_right( &trngls[ ((uint32_t*)(node->trngl_indices.data)) [i] ], mid, split_axis) ) {
+            bool tmp = Array_grow_if_full(&node->right->trngl_indices);
+            if(!tmp)
+                return; // TODO: Handle this properly
+            ((uint32_t*)(node->right->trngl_indices.data)) [node->right->trngl_indices.size] = ((uint32_t*)node->trngl_indices.data)[i];
+            node->right->trngl_indices.size++;
+        }
+    }
+
+    BVH_construct(trngls, node->left, next_axis);
+    BVH_construct(trngls, node->right, next_axis);
+}
+
+void BVH_destroy(BVH* node) {
+    if(!BVH_is_leaf(node)) {
+        BVH_destroy(node->left);
+        BVH_destroy(node->right);
+    }
+    Array_destroy(&node->trngl_indices);
+    free(node);
+}
+
 void icosphere_destroy(object* obj) {
-    if(obj && obj->trngls)
-        free(obj->trngls);
+    if(obj) {
+        if(obj->trngls)
+            free(obj->trngls);
+        if(obj->bound_vol) 
+            BVH_destroy(obj->bound_vol);
+    }
     *obj = (object) {0};
 }

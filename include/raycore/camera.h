@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <vecs/vecs.h>
 #include "colors.h"
-#include "object.h"
+#include "bbox.h"
 
 struct viewport_t {
     double width;

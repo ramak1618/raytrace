@@ -1,0 +1,122 @@
+#include "../../include/raycore/bbox.h"
+
+#include <stddef.h>
+
+bool AABB_hit(AABB bbox, ray incident, double tmax) {
+    double t_min_x = (bbox.x_min - incident.src.X) / incident.dir.X;
+    double t_max_x = (bbox.x_max - incident.src.X) / incident.dir.X;
+
+    double t_min_y = (bbox.y_min - incident.src.Y) / incident.dir.Y;
+    double t_max_y = (bbox.y_max - incident.src.Y) / incident.dir.Y;
+
+    double t_min_z = (bbox.z_min - incident.src.Z) / incident.dir.Z;
+    double t_max_z = (bbox.z_max - incident.src.Z) / incident.dir.Z;
+
+    if(t_min_x > t_max_x) {
+        double t = t_min_x;
+        t_min_x = t_max_x;
+        t_max_x = t;
+    }
+
+    if(t_min_y > t_max_y) {
+        double t = t_min_y;
+        t_min_y = t_max_y;
+        t_max_y = t;
+    }
+
+    if(t_min_z > t_max_z) {
+        double t = t_min_z;
+        t_min_z = t_max_z;
+        t_max_z = t;
+    }
+
+    double max_of_mins = t_min_x;
+    if(t_min_y > max_of_mins)
+        max_of_mins = t_min_y;
+    if(t_min_z > max_of_mins)
+        max_of_mins = t_min_z;
+
+    double min_of_maxs = t_max_x;
+    if(t_max_y < min_of_maxs)
+        min_of_maxs = t_max_y;
+    if(t_max_z < min_of_maxs)
+        min_of_maxs = t_max_z;
+
+    if(min_of_maxs < 0)
+        return false;
+
+    if(max_of_mins > tmax && tmax > 0)
+        return false;
+
+    return max_of_mins < min_of_maxs;
+}
+
+bool BVH_is_leaf(const BVH* node) {
+    return node->left == NULL;
+}
+
+hit_record BVH_hit(const triangle* trngls, const BVH* node, ray incident, double* tmax) {
+    if(!AABB_hit(node->bbox, incident, *tmax)) {
+        return (hit_record) {
+            .t = -1.0
+        };
+    }
+
+    if(BVH_is_leaf(node)) {
+        hit_record hitted = {
+            .t = -1.0
+        };
+        for(uint32_t i=0; i<node->trngl_indices.size; i++) {
+            hit_record hitrec = triangle_hit(&trngls[((uint32_t*)node->trngl_indices.data)[i]], incident, *tmax);
+            if(hitrec.t > 0) {
+                *tmax = hitrec.t;
+                hitted = hitrec;
+            }
+        }
+
+        return hitted;
+    }
+
+    hit_record left = BVH_hit(trngls, node->left, incident, tmax);
+    hit_record right = BVH_hit(trngls, node->right, incident, tmax);
+
+    if(left.t < 0 && right.t < 0) {
+        return (hit_record) {
+            .t = -1.0
+        };
+    }
+
+    if(left.t < 0) 
+        return right;
+    if(right.t < 0)
+        return left;
+
+    if(left.t < right.t)
+        return left;
+    else
+        return right;
+}
+
+bool is_triangle_in_left(const triangle* trngl, double mid, XYZ_axis axis) {
+    switch(axis) {
+        case AXIS_X:
+            return trngl->A.X <= mid || trngl->B.X <= mid || trngl->C.X <= mid;
+        case AXIS_Y:
+            return trngl->A.Y <= mid || trngl->B.Y <= mid || trngl->C.Y <= mid;
+        case AXIS_Z:
+            return trngl->A.Z <= mid || trngl->B.Z <= mid || trngl->C.Z <= mid;
+    }
+    /* unreachable */ return false;
+}
+
+bool is_triangle_in_right(const triangle* trngl, double mid, XYZ_axis axis) {
+    switch(axis) {
+        case AXIS_X:
+            return trngl->A.X >= mid || trngl->B.X >= mid || trngl->C.X >= mid;
+        case AXIS_Y:
+            return trngl->A.Y >= mid || trngl->B.Y >= mid || trngl->C.Y >= mid;
+        case AXIS_Z:
+            return trngl->A.Z >= mid || trngl->B.Z >= mid || trngl->C.Z >= mid;
+    }
+    /* unreachable */ return false;
+}

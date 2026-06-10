@@ -2,7 +2,7 @@
 #define ICOSPHERE_H
 
 #include <stdint.h>
-#include <raycore/object.h>
+#include <raycore/bbox.h>
 
 // k is number of times to divide each triangle into 4 triangles,
 // starting from a regular icosahedron
