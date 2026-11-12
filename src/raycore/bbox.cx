@@ -1,4 +1,4 @@
-#include "../../include/raycore/bbox.h"
+#include <raycore/bbox.h>
 
 #include <stddef.h>
 

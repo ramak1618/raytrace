@@ -1,8 +1,8 @@
-#include <vecs/vecs.h>
+#include <raycore/vecs.h>
 #include <raycore/colors.h>
-#include <encoder/png.h>
+#include <raycore/encoder/png.h>
 #include <raycore/camera.h>
-#include <shapes/icosphere.h>
+#include <raycore/shapes/icosphere.h>
 
 #include <stdio.h>
 #include <math.h>

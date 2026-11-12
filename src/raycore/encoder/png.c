@@ -1,4 +1,4 @@
-#include "../../include/encoder/png.h"
+#include <raycore/encoder/png.h>
 
 #include <stdio.h>
 #include <libavcodec/avcodec.h>

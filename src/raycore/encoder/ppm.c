@@ -1,4 +1,4 @@
-#include "../../include/encoder/ppm.h"
+#include <raycore/encoder/ppm.h>
 
 #include <stdio.h>
 

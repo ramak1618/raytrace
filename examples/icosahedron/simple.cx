@@ -1,6 +1,6 @@
-#include <vecs/vecs.h>
+#include <raycore/vecs.h>
 #include <raycore/colors.h>
-#include <encoder/png.h>
+#include <raycore/encoder/png.h>
 #include <raycore/camera.h>
 
 #include <stdio.h>

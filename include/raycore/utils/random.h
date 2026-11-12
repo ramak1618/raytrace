@@ -1,7 +1,7 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
-#include "pcg/pcg_basic.h"
+#include <pcg/pcg_basic.h>
 
 struct pcg32_gen_pair_t {
     pcg32_random_t gen1;

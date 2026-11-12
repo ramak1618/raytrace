@@ -1,7 +1,7 @@
-#include "../../include/raycore/camera.h"
+#include <raycore/camera.h>
 
 #include <stdlib.h>
-#include <utils/random.h>
+#include <raycore/utils/random.h>
 
 camera camera_create(pos3 pos, viewport vp, cam_orient_rfu orient, resolution res) {
     camera cam =  {

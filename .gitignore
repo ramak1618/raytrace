@@ -1,14 +1,10 @@
-# compiled executables
-*.o
+# build artifacts
+build/
+examples/**/build/
 
 # img files
 *.ppm
 *.png
-
-# transpiled code
-src/raycore/
-src/shapes/
-examples/**/*.c
 
 # vim swp files
 *.swp

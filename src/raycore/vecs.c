@@ -1,4 +1,4 @@
-#include "../../include/vecs/vecs.h"
+#include <raycore/vecs.h>
 
 #include <math.h>
 

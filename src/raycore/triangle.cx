@@ -1,4 +1,4 @@
-#include "../../include/raycore/triangle.h"
+#include <raycore/triangle.h>
 #include <math.h>
 
 triangle triangle_from_edges(pos3 p, vec3 e1, vec3 e2) {

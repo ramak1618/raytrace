@@ -1,7 +1,7 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-#include <vecs/vecs.h>
+#include "vecs.h"
 
 struct triangle_t {
     pos3 A;

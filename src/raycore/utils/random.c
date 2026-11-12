@@ -1,4 +1,4 @@
-#include "../../include/utils/random.h"
+#include <raycore/utils/random.h>
 
 /*
  * Refer to https://github.com/imneme/pcg-c-basic/blob/master/pcg32x2-demo.c

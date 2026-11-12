@@ -1,4 +1,4 @@
-#include "../../include/utils/array.h"
+#include <raycore/utils/array.h>
 
 #include <stdlib.h>
 

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <vecs/vecs.h>
+#include "vecs.h"
 #include "colors.h"
 #include "bbox.h"
 
