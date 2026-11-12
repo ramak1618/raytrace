@@ -51,12 +51,16 @@ Dependencies
 
 License
 -------
-Licensed under the [MIT License][licenselink]
+Licensed under the [CC0-1.0 Universal][licenselink]
+
+This license DOES NOT EXTEND TO `./external`
+
+The software in this directory belong to third-party, and have their own licenses.
+See [below][tps]
 
 Third-Party Software
 --------------------
-The random number generator at `./external/pcg` directory is sourced from [pcg-c-basic][pcg_code] which is licensed under the Apache License, Version 2.0.
-A copy of the license is included in that directory.
+The random number generator at `./external/pcg` directory is sourced from [pcg-c-basic][pcg_code] which is licensed under the [Apache License, Version 2.0][pcglicense]
 
 References
 ----------
@@ -73,6 +77,8 @@ References
 [pbrt]: https://pbrt.org/
 [icostuff]: https://geometryofthinking.com/2023/08/30/the-icosahedron/
 [deps]: #Dependencies
+[tps]: #third-party-software
 [ffmpeg_home]: https://ffmpeg.org/
 [pcg_code]: https://github.com/imneme/pcg-c-basic/
 [pcg]: https://www.pcg-random.org/
+[pcglicense]: external/pcg/LICENSE.txt
