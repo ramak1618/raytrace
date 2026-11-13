@@ -26,8 +26,8 @@ macro(add_example SRC_BASE_NAME)
     string(CONCAT CSRC ${SRC_BASE_NAME} ".c")
     string(CONCAT OUT  ${SRC_BASE_NAME} ".o")
 
-    add_custom_target(
-            csrc ALL
+    add_custom_command(
+            OUTPUT ${CSRC}
             COMMAND ${VEXPAND} ${CMAKE_SOURCE_DIR}/${XSRC} ${CSRC}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
