@@ -20,7 +20,7 @@ const double cosedge = 0.4472135954999579;
 // std. faces for k=0 icosphere, radius = 1, centre = (0, 0, 0);
 const double sa = 0.5 * radedge; //half edge length
 const double sd = sa * phi; // distance b/w opp. vertices (i.e two vertices along a 5-fold symmetric axis)
-face std_ico[20] = {
+const face std_ico[20] = {
     {{sd, sa, 0}, {sa, 0, sd}, {0, sd, sa}},
     {{sd, sa, 0}, {sa, 0, sd}, {sd, -sa, 0}},
     {{sd, sa, 0}, {sa, 0, -sd}, {sd, -sa, 0}},
@@ -47,8 +47,8 @@ face std_ico[20] = {
 };
 
 
-void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis);
-void BVH_destroy(BVH* node);
+static void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis);
+static void BVH_destroy(BVH* node);
 
 object icosphere_create(pos3 centre, double radius, uint32_t k) {
     // don't want such high frequency icospheres.
@@ -126,7 +126,7 @@ end:
     return obj;
 }
 
-void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis) {
+static void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis) {
     if(node->trngl_indices.size <= 20) {
         node->left = NULL;
         node->right = NULL;
@@ -190,7 +190,7 @@ void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis) {
     BVH_construct(trngls, node->right, next_axis);
 }
 
-void BVH_destroy(BVH* node) {
+static void BVH_destroy(BVH* node) {
     if(!BVH_is_leaf(node)) {
         BVH_destroy(node->left);
         BVH_destroy(node->right);

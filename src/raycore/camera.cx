@@ -37,7 +37,7 @@ void camera_destroy(camera* cam) {
     free(cam->imgbuf);
 }
 
-lRGB trace_ray(ray incident, const object* objs, uint32_t num_objects) {
+static lRGB trace_ray(ray incident, const object* objs, uint32_t num_objects) {
     double closest = -1;
     lRGB clr = {0, 0, 0};
 

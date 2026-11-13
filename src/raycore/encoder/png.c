@@ -10,7 +10,7 @@ struct encoder {
 };
 
 // Reference: https://ffmpeg.org/doxygen/trunk/encode_video_8c-example.html
-enum PNGerr encoder_create(struct encoder* enc, lRGB** img, uint32_t width, uint32_t height) {
+static enum PNGerr encoder_create(struct encoder* enc, lRGB** img, uint32_t width, uint32_t height) {
     enc->ctx = NULL;
     enc->pkts = NULL;
 
@@ -91,7 +91,7 @@ enum PNGerr encoder_create(struct encoder* enc, lRGB** img, uint32_t width, uint
     return PNG_OK;
 }
 
-void encoder_destroy(struct encoder* enc) {
+static void encoder_destroy(struct encoder* enc) {
     if(enc->pkts) {
         for(size_t i=0; i<enc->num_pkts; i++)
             av_packet_free(&enc->pkts[i]);
