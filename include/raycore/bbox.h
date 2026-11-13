@@ -31,14 +31,7 @@ struct BVH_t {
 };
 typedef struct BVH_t BVH;
 
-enum XYZ_axis_t {
-    AXIS_X, AXIS_Y, AXIS_Z
-};
-typedef enum XYZ_axis_t XYZ_axis;
-
 bool BVH_is_leaf(const BVH* node);
-bool is_triangle_in_left(const triangle* trngl, double mid, XYZ_axis axis);
-bool is_triangle_in_right(const triangle* trngl, double mid, XYZ_axis axis);
 hit_record BVH_hit(const triangle* trngls, const BVH* node, ray incident, double* tmax);
 
 struct object_t {

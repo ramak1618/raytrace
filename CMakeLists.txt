@@ -49,7 +49,8 @@ add_library(raytrace SHARED
         src/raycore/vecs.c
         src/raycore/utils/array.c
         external/pcg/pcg_basic.c 
-        src/raycore/utils/random.c 
+        src/raycore/utils/random.c
+        src/raycore/utils/misc.c
         ${CMAKE_BINARY_DIR}/triangle.c
         ${CMAKE_BINARY_DIR}/camera.c
         ${CMAKE_BINARY_DIR}/bbox.c
@@ -67,6 +68,7 @@ target_sources(
         include/raycore/vecs.h
         include/raycore/utils/array.h
         include/raycore/utils/random.h
+        include/raycore/utils/misc.h
         include/raycore/colors.h
         include/raycore/triangle.h
         include/raycore/camera.h

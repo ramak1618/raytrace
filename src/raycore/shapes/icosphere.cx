@@ -1,8 +1,8 @@
 #include <raycore/shapes/icosphere.h>
+#include <raycore/utils/misc.h>
 
 #include <stdlib.h>
 #include <math.h>
-#include <stdio.h>
 
 // It is easier to generate icospheres with vertex triplets rather than edges
 typedef pos3 face[3];
@@ -46,6 +46,10 @@ const face std_ico[20] = {
     {{0, sd, -sa}, {-sd, sa, 0}, {0, sd, sa}},
 };
 
+enum XYZ_axis_t {
+    AXIS_X, AXIS_Y, AXIS_Z
+};
+typedef enum XYZ_axis_t XYZ_axis;
 
 static void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis);
 static void BVH_destroy(BVH* node);
@@ -169,15 +173,33 @@ static void BVH_construct(const triangle* trngls, BVH* node, XYZ_axis split_axis
     node->left->trngl_indices = Array_create(sizeof(uint32_t), 10);
     node->right->trngl_indices = Array_create(sizeof(uint32_t), 10);
 
+    uint32_t* indices = node->trngl_indices.data;
     for(uint32_t i=0; i<node->trngl_indices.size; i++) {
-        if(is_triangle_in_left( &trngls[ ((uint32_t*)(node->trngl_indices.data)) [i] ], mid, split_axis) ) {
+        bool in_left, in_right;
+
+        triangle trngl = trngls[indices[i]];
+        switch(split_axis) {
+            case AXIS_X:
+                in_left = any3_under_threshold(trngl.A.X, trngl.B.X, trngl.C.X, mid);
+                in_right = any3_over_threshold(trngl.A.X, trngl.B.X, trngl.C.X, mid);
+                break;
+            case AXIS_Y:
+                in_left = any3_under_threshold(trngl.A.Y, trngl.B.Y, trngl.C.Y, mid);
+                in_right = any3_over_threshold(trngl.A.Y, trngl.B.Y, trngl.C.Y, mid);
+                break;
+            case AXIS_Z:
+                in_left = any3_under_threshold(trngl.A.Z, trngl.B.Z, trngl.C.Z, mid);
+                in_right = any3_over_threshold(trngl.A.Z, trngl.B.Z, trngl.C.Z, mid);
+                break;
+        }
+        if(in_left) {
             bool tmp = Array_grow_if_full(&node->left->trngl_indices);
             if(!tmp)
                 return; // TODO: Handle this properly
             ((uint32_t*)(node->left->trngl_indices.data)) [node->left->trngl_indices.size] = ((uint32_t*)node->trngl_indices.data)[i];
             node->left->trngl_indices.size++;
         }
-        if(is_triangle_in_right( &trngls[ ((uint32_t*)(node->trngl_indices.data)) [i] ], mid, split_axis) ) {
+        if(in_right) {
             bool tmp = Array_grow_if_full(&node->right->trngl_indices);
             if(!tmp)
                 return; // TODO: Handle this properly

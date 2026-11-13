@@ -96,27 +96,3 @@ hit_record BVH_hit(const triangle* trngls, const BVH* node, ray incident, double
     else
         return right;
 }
-
-bool is_triangle_in_left(const triangle* trngl, double mid, XYZ_axis axis) {
-    switch(axis) {
-        case AXIS_X:
-            return trngl->A.X <= mid || trngl->B.X <= mid || trngl->C.X <= mid;
-        case AXIS_Y:
-            return trngl->A.Y <= mid || trngl->B.Y <= mid || trngl->C.Y <= mid;
-        case AXIS_Z:
-            return trngl->A.Z <= mid || trngl->B.Z <= mid || trngl->C.Z <= mid;
-    }
-    /* unreachable */ return false;
-}
-
-bool is_triangle_in_right(const triangle* trngl, double mid, XYZ_axis axis) {
-    switch(axis) {
-        case AXIS_X:
-            return trngl->A.X >= mid || trngl->B.X >= mid || trngl->C.X >= mid;
-        case AXIS_Y:
-            return trngl->A.Y >= mid || trngl->B.Y >= mid || trngl->C.Y >= mid;
-        case AXIS_Z:
-            return trngl->A.Z >= mid || trngl->B.Z >= mid || trngl->C.Z >= mid;
-    }
-    /* unreachable */ return false;
-}
